@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Simple program to test net speeds and log them to a database
-# by Wesley Stutzman
+# by wezley3
 # 1/18/2021
 
 import subprocess 
@@ -34,16 +34,19 @@ def read_db(db_location, query):
 
 # Creates db table if one does not exsist
 def create_db_table(db_location, table_name, insert_query=None, force_exit=False):
+
+  # Check if table all ready exsists
   query = ("select name from sqlite_master where type='table' and name='%s';" % (table_name))
   result = read_db(db_location, query)
   if len(result) > 0:
     return True
 
+  # If a create table query was provided and force_exit is False add table
   if insert_query is not None and force_exit is False:
     edit_db(db_location, insert_query)
     return create_db_table(db_location, table_name, insert_query, True)
 
-  return False
+  return False # If no table was created
 
 # Information to create database tables if needed
 def build_tables(db_location):
@@ -216,22 +219,22 @@ if __name__ == "__main__":
       if sys.argv[i][0] is not '-':
         continue
 
-      # Save database location
+      # Set database location
       if sys.argv[i] == "-d":
         if i + 1 < len(sys.argv):
           db_location = sys.argv[i + 1]
 
-      # Save ping attemts
+      # Set ping attemts
       if sys.argv[i] == "-p":
         if i + 1 < len(sys.argv):
           ping_attempts = int(sys.argv[i + 1])
 
-      # Save servers2test
+      # Set servers2test
       if sys.argv[i] == "-t":
         if i + 1 < len(sys.argv):
           servers2test = int(sys.argv[i + 1])
 
-      # Save test_delay 
+      # Set test_delay 
       if sys.argv[i] == "-s":
         if i + 1 < len(sys.argv):
           test_delay = int(sys.argv[i + 1])
@@ -239,7 +242,6 @@ if __name__ == "__main__":
       # Set global verbose setting
       if sys.argv[i] == "-v":
         verbose = True
-
   
       # Print help otions then exit
       if sys.argv[i] == "-h" or sys.argv[i] == "--help":
@@ -249,6 +251,7 @@ if __name__ == "__main__":
         print("'-t 4' to set servers to test to 4: default 2")
         print("'-s 60' to set sleep between runs to 60sec: default 30sec")
         exit()
+
 
   # Check for database, if none provided default to verbose settings
   if db_location is None:
@@ -261,6 +264,7 @@ if __name__ == "__main__":
     # Build the tables for database if needed
     build_tables(db_location)
 
+
   # Print information when inside verbose
   if verbose is True:
     print()
@@ -272,11 +276,12 @@ if __name__ == "__main__":
     print("Delay between tests", test_delay)
     print()
 
+
   # Store common datetime for all tests
   current_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
   if verbose is True:
-    print("Started at", current_date)
+    print("Starting tests at", current_date)
 
   # Link to speed test class
   s = speedtest.Speedtest()
@@ -287,6 +292,7 @@ if __name__ == "__main__":
   # Create master list for results
   speed_test_results = []
 
+
   if verbose is True:
     print("Testing top %d servers" % (servers2test))
 
@@ -294,6 +300,6 @@ if __name__ == "__main__":
   for i in range(0, servers2test):
     if i is not 0:
       if verbose is True:
-        print("\nResting for %dsec" % (test_delay))
+        print("\nResting for %d sec" % (test_delay))
       time.sleep(test_delay)
     test_server(db_location, server_list[i], ping_attempts)
