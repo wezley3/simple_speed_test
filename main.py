@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
 
   # Store common datetime for all tests
-  current_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+  current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
   if verbose is True:
     print("Starting tests at", current_date)
