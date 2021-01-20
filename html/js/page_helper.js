@@ -63,6 +63,7 @@ function draw_chart(chart, data_set){
     // Use chart key to extract data from json object
     data: build_data_set(chart['key'], data_set),
     options:{
+      tooltips:{intersect:false, mode:'index', axis:'x'},
       title:{
         display:true,text: chart['title'],fontSize:18
       },
