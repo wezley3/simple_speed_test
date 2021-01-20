@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+
+    <title>Simple Speed Test</title>
+
+
+    <!-- Create a new view for mobile applications --!>
+    <meta name='viewport' content='width=device-width, initial-scale=1, minimum-scale=1, user-scalable=no, minimal-ui'>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+
+    <script src='js/node_modules/chart.js/dist/Chart.js'></script>
+    <script type='text/javascript' src='/sst/js/page_helper.js'></script>
+
+    <!--css links --!>
+    <link rel='stylesheet' href='sst.css'>
+
+  </head>
+
+  <!--Div elements to display html for the js functions --!>
+  <body>
+    <h1>Simple Speed Tests Results</h1>
+    <canvas id="download_chart" width="40" height="10"></canvas>
+    <canvas id="upload_chart" width="40" height="10"></canvas>
+    <canvas id="ping_chart" width="40" height="10"></canvas>
+  </body>
+
+  <!-- Scripts to load default page information --!>
+
+<script>
+  load_all_charts('download_chart', 'upload_chart', 'ping_chart');
+</script>
+
+</html>
