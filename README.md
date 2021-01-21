@@ -1,9 +1,9 @@
 # simple_speed_test
-Runs a simple speed test and logs the results to sqlite3.
+Runs a simple speed test and logs the results to sqlite3 and post requests.
 
 Required imports 
 
-pip3 install sqlite3 speedtest-cli
+pip3 install sqlite3 requests speedtest-cli
 
 
 # Command line arguments
