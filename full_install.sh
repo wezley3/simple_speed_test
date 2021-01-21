@@ -23,10 +23,10 @@ chown -R www-data. /srv/databases/sst
 
 # Allow other users added to www-data group to edit db
 chmod 776 /srv/databases/sst
-chmod 664 /srv/databases/sst/results.db
+chmod 665 /srv/databases/sst/results.db
 
 # Copy over html to apache
-cp -r ./html /var/www/html/simple_speed_test
+cp -r ./html /var/www/html/sst
 
 # Print out data for user
 echo "\n\nInstall Finished"
