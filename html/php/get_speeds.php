@@ -92,7 +92,7 @@ function get_all_test_results($db_location){
 
 }
 
-$db_location = "/home/wez/databases/speed_tests.db";
+$db_location = "/srv/databases/sst/results.db";
 $result_list = get_all_test_results($db_location);
 
 echo json_encode($result_list);

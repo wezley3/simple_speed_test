@@ -5,13 +5,32 @@
 
 import subprocess 
 import speedtest
+import requests
 import datetime
 import sqlite3
+import json
 import time
 import sys
 
 global verbose
 global current_date
+
+# Send results to php server
+def post_results(url, results):
+
+  print()
+  print(results)
+  print()
+
+  ping_holder = results['ping']
+  results['ping'] = json.dumps(results['ping'])
+
+  r = requests.post(url, results)
+  results['ping'] = ping_holder
+
+  if verbose is True:
+    print("Post result code:", r.status_code)
+    print("Post results:", r.text)
 
 # simple sqlite3 edit command
 def edit_db(db_location, query):
@@ -65,7 +84,7 @@ def log_result(db_name, result):
 
   # Store all speed test results
   ping = result['ping']
-  results_query = ("insert into results(id, download, upload, ping_min, ping_avg, ping_max, ping_mdev, distance, ins_date)values(%d, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, '%s');" % (result['id'], result['download'], result['upload'], ping['min'], ping['avg'], ping['max'], ping['mdev'], result['distance'], current_date))
+  results_query = ("insert into results(id, download, upload, ping_min, ping_avg, ping_max, ping_mdev, distance, ins_date)values(%d, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, '%s');" % (result['id'], result['download'], result['upload'], ping['min'], ping['avg'], ping['max'], ping['mdev'], result['distance'], result['ins_date']))
 
   # Insert info into db
   edit_db(db_location, id_query)
@@ -150,13 +169,12 @@ def get_server_list(s=speedtest.Speedtest()):
   return server_list
 
 # Test the speeds of a given server and log the results into the provided database
-def test_server(db_location, server, ping_attempts):
+def test_server(db_location, post_url, server, ping_attempts):
 
   # Get server for ping and strip port number off
   ping_url = server['host'] 
   ping_url = ping_url[:len(ping_url) - 5]
 
-  global verbose
   if verbose is True:
     print()
     print("Server:", ping_url)
@@ -175,6 +193,7 @@ def test_server(db_location, server, ping_attempts):
   results['url'] = ping_url
   results['distance'] = float(server['distance'])
   results['ping'] = ping_results
+  results['ins_date'] = current_date 
 
   if verbose is True:
     print("Distance from server: %0.3f KM" % (results['distance']))
@@ -195,6 +214,10 @@ def test_server(db_location, server, ping_attempts):
   if db_location is not None:
     log_result(db_location, results)
 
+  # Post results to server if provided
+  if post_url is not None:
+    post_results(post_url, results)
+
   return results
 
 if __name__ == "__main__":
@@ -208,6 +231,7 @@ if __name__ == "__main__":
   ping_attempts = 3
   servers2test = 2
   test_delay = 30
+  post_url = None
 
   # Check for system arguments
   if len(sys.argv) > 1:
@@ -223,6 +247,16 @@ if __name__ == "__main__":
       if sys.argv[i] == "-d":
         if i + 1 < len(sys.argv):
           db_location = sys.argv[i + 1]
+
+      # Set post url 
+      if sys.argv[i] == "-u":
+        if i + 1 < len(sys.argv):
+          post_url = sys.argv[i + 1]
+
+      # Set post url to wezley3s common server
+      if sys.argv[i] == "-U":
+        if i + 1 < len(sys.argv):
+          post_url = "https://statz.live/sst/php/post_results.php"
 
       # Set ping attemts
       if sys.argv[i] == "-p":
@@ -271,6 +305,7 @@ if __name__ == "__main__":
     print("Testing information")
     print("Verbose:", verbose)
     print("Database:", db_location)
+    print("Post url:", post_url)
     print("Ping attempts:", ping_attempts)
     print("Servers to test:", servers2test)
     print("Delay between tests", test_delay)
@@ -302,4 +337,4 @@ if __name__ == "__main__":
       if verbose is True:
         print("\nResting for %d sec" % (test_delay))
       time.sleep(test_delay)
-    test_server(db_location, server_list[i], ping_attempts)
+    test_server(db_location, post_url, server_list[i], ping_attempts)

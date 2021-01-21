@@ -105,7 +105,7 @@ function load_all_charts(download, upload, ping){
                 {link:ping,key:'ping',title:'Ping Speeds'}];
 
   // Fetch data from this url
-  var url = "http://192.168.1.49/sst/php/get_speeds.php";
+  var url = "http://192.168.1.41/sst/php/get_speeds.php";
   fetch_data(charts, url);
 
 }
