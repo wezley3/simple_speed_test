@@ -14,7 +14,7 @@ pip3 install sqlite3 requests speedtest-cli
 
 '-d speed_test.db' to set Database location: default None
 
-'-u https://test.com/sst/php/post_results.php' to set custom upload ulr
+'-u http://127.0.0.1/sst/php/post_results.php' to set custom upload ulr
 
 '-U' to default to statz.live
 
