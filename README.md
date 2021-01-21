@@ -14,6 +14,10 @@ pip3 install sqlite3 speedtest-cli
 
 '-d speed_test.db' to set Database location: default None
 
+'-u https://test.com/sst/php/post_results.php' to set custom upload ulr
+
+'-U' to default to statz.live
+
 '-p 4' sets Ping attempts to 4: default 3
 
 '-t 4' to set servers to Test to 4: default 2
@@ -35,9 +39,22 @@ Tests three servers with a sixty seconds delay between tests and logs results to
 
 /home/user_name/simple_speed_test/main.py -d /home/user_name/databases/speed_test.db -t 3 -s 60
 
+Test default settings and upload data to custom post server
+
+./main.py -u http://127.0.0.1/simple_speed_test/php/post_results.php
+
+# Web Setup
+
+Run the setup_apache.sh to handle installing and setting apache2 settings
+
+Link html file to /var/www/html/
+
+Example: 'ln -s /home/user/programs/simple_speed_test/html /var/www/html/simple_speed_test'
 
 # Other Information
 
 Database and tables are created at runtime if needed.
 
 Designed and tested on debian os.
+
+Statz.live is an in progress data viewing website. Data will be logged to server with -U command and will be able to be viewed by distances from test servers in the future.
