@@ -19,6 +19,10 @@ systemctl restart apache2
 # Create database for php
 mkdir -p /srv/databases/sst
 chown -R www-data. /srv/databases/sst
+touch /srv/databases/sst/results.db
+
+chmod 776 /srv/databases/sst
+chmod 664 /srv/databases/sst/results.db
 
 cp ./html /var/www/html/simple_speed_test
 
