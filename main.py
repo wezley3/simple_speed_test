@@ -18,21 +18,21 @@ global current_date
 # Send results to php server
 def post_results(url, results):
 
-  print()
-  print(results)
-  print()
-
+  # Copy ping to json obj to properly be sent to sever
   ping_holder = results['ping']
   results['ping'] = json.dumps(results['ping'])
 
+  # Send request
   r = requests.post(url, results)
+
+  # Copy ping back
   results['ping'] = ping_holder
 
   if verbose is True:
     print("Post result code:", r.status_code)
     print("Post results:", r.text)
 
-# simple sqlite3 edit command
+# Simple sqlite3 edit command
 def edit_db(db_location, query):
   conn = sqlite3.connect(db_location)
   db = conn.cursor()
@@ -40,7 +40,7 @@ def edit_db(db_location, query):
   conn.commit()
   conn.close()
 
-# simple sqlite3 read command
+# Simple sqlite3 read command
 def read_db(db_location, query):
   conn = sqlite3.connect(db_location)
   db = conn.cursor()
@@ -243,6 +243,10 @@ if __name__ == "__main__":
       if sys.argv[i][0] is not '-':
         continue
 
+      # Set global verbose setting
+      if sys.argv[i] == "-v":
+        verbose = True
+
       # Set database location
       if sys.argv[i] == "-d":
         if i + 1 < len(sys.argv):
@@ -255,8 +259,7 @@ if __name__ == "__main__":
 
       # Set post url to wezley3s common server
       if sys.argv[i] == "-U":
-        if i + 1 < len(sys.argv):
-          post_url = "https://statz.live/sst/php/post_results.php"
+        post_url = "https://statz.live/sst/php/post_results.php"
 
       # Set ping attemts
       if sys.argv[i] == "-p":
@@ -272,15 +275,13 @@ if __name__ == "__main__":
       if sys.argv[i] == "-s":
         if i + 1 < len(sys.argv):
           test_delay = int(sys.argv[i + 1])
-
-      # Set global verbose setting
-      if sys.argv[i] == "-v":
-        verbose = True
   
       # Print help otions then exit
       if sys.argv[i] == "-h" or sys.argv[i] == "--help":
         print("'-v' to enable verbose option")
         print("'-d database_location.db' to set database")
+        print("'-u https://test.com/sst/php/post_results.php' to set custom upload url")
+        print("'-U to default to statz.live")
         print("'-p 4' to set ping attemts to 4: default 3")
         print("'-t 4' to set servers to test to 4: default 2")
         print("'-s 60' to set sleep between runs to 60sec: default 30sec")
@@ -288,7 +289,7 @@ if __name__ == "__main__":
 
 
   # Check for database, if none provided default to verbose settings
-  if db_location is None:
+  if db_location is None and verbose is False:
     print()
     print("No database location provided")
     print("Use -h or --help for help")
