@@ -289,12 +289,13 @@ if __name__ == "__main__":
 
 
   # Check for database, if none provided default to verbose settings
-  if db_location is None and verbose is False:
-    print()
-    print("No database location provided")
-    print("Use -h or --help for help")
-    print("Defaulting to verbose")
-    verbose = True
+  if db_location is None:
+    if verbose is False:
+      print()
+      print("No database location provided")
+      print("Use -h or --help for help")
+      print("Defaulting to verbose")
+      verbose = True
   else:
     # Build the tables for database if needed
     build_tables(db_location)

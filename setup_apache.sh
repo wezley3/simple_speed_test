@@ -18,4 +18,4 @@ chown -R www-data. /srv/databases/sst
 # Print info about linking html package
 
 echo "Please move or link html package to /var/www/"
-echo "Example: ln -s /home/user/simple_speed_test/html /var/www/simple_speed_test"
+echo "Example: ln -s /home/user/simple_speed_test/html /var/www/html/simple_speed_test"
