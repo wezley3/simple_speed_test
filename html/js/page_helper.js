@@ -1,3 +1,6 @@
+// Page helper designed to load charts onto provided canvasses 
+//  from given json object
+//wezley3
 
 // Helps format data sets
 function build_data_set(data_key, data_sets){
@@ -98,6 +101,7 @@ function fetch_data(charts, url){
 
 }
 
+// Help create proper chart dict to load canvases
 function load_all_charts(download, upload, ping){
 
   var charts = [{link:download,key:'download',title:'Download Speeds'},
@@ -105,7 +109,7 @@ function load_all_charts(download, upload, ping){
                 {link:ping,key:'ping',title:'Ping Speeds'}];
 
   // Fetch data from this url
-  var url = "http://192.168.1.41/sst/php/get_speeds.php";
+  var url = "/sst/php/get_speeds.php";
   fetch_data(charts, url);
 
 }
