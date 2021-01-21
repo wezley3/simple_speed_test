@@ -1,7 +1,7 @@
 <?php
 
 # Build all tables exclusive to this database 
-function build_tables($db_location){
+function build_tables($db_location, $force_exit){
 
   $host_table_query = "create table host(id int primart key not null, url text not null);";
   $results_table_query = "create table results(id int not null, download real, upload real, ping_min real, ping_avg real, ping_max real, ping_mdev real, distance real, ins_date date, FOREIGN KEY(id) references host(id));";
@@ -28,8 +28,6 @@ function create_table($db_location, $table_name, $insert_query, $force_exit){
   }
 
   return False;# if no table was created
-
-
 }
 
 
@@ -51,17 +49,15 @@ $ping = json_decode($results['ping'], true);
 
 # Build querys to insert data into database
 $results_query = sprintf("insert into results(id, download, upload, ping_min, ping_avg, ping_max, ping_mdev, distance, ins_date)values(%d, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, '%s');", $results['id'], $results['download'], $results['upload'], $ping['min'], $ping['avg'], $ping['max'], $ping['mdev'], $results['distance'], $results['ins_date']);
-
 $host_query = sprintf("insert into host(id, url) select %d, '%s' where not exists(select 1 from host where id = %d);", $results['id'], $results['url'], $results['id']);
 
 # Insert the data into the database
 $db_location = "/srv/databases/sst/results.db";
-build_tables($db_location);
+build_tables($db_location, false);
 $db = new SQLite3($db_location);
 $db->exec($results_query);
 $db->exec($host_query);
 $db->close();
 
 echo "Data uploaded successfully";
-
 ?>
