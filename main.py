@@ -281,7 +281,7 @@ if __name__ == "__main__":
         print("'-v' to enable verbose option")
         print("'-d database_location.db' to set database")
         print("'-u https://test.com/sst/php/post_results.php' to set custom upload url")
-        print("'-U to default to statz.live")
+        print("'-U' to default to statz.live")
         print("'-p 4' to set ping attemts to 4: default 3")
         print("'-t 4' to set servers to test to 4: default 2")
         print("'-s 60' to set sleep between runs to 60sec: default 30sec")
