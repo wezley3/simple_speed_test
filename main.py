@@ -5,6 +5,7 @@
 
 import subprocess 
 import speedtest
+import argparse
 import requests
 import datetime
 import sqlite3
@@ -12,11 +13,8 @@ import json
 import time
 import sys
 
-global verbose
-global current_date
-
 # Send results to php server
-def post_results(url, results):
+def post_results(url, results, verbose):
 
   # Copy ping to json obj to properly be sent to sever
   ping_holder = results['ping']
@@ -77,7 +75,10 @@ def build_tables(db_location):
   create_db_table(db_location, "results", results_table_query)
 
 # Log the results from a speed test
-def log_result(db_name, result):
+def log_result(db_location, result):
+  
+  # Insure provided db contains tables
+  build_tables(db_location)
 
   # Store id and server url if needed
   id_query = ("insert into host(id, url) select %d, '%s' where not exists(select 1 from host where id = %d);" % (result['id'], result['url'], result['id']));
@@ -169,18 +170,18 @@ def get_server_list(s=speedtest.Speedtest()):
   return server_list
 
 # Test the speeds of a given server and log the results into the provided database
-def test_server(db_location, post_url, server, ping_attempts):
+def test_server(args, server):
 
   # Get server for ping and strip port number off
   ping_url = server['host'] 
   ping_url = ping_url[:len(ping_url) - 5]
 
-  if verbose is True:
+  if args.verbose is True:
     print()
     print("Server:", ping_url)
 
   # Run ping on server
-  ping_results = quick_ping(ping_url, ping_attempts)
+  ping_results = quick_ping(ping_url, args.ping)
 
   # Select specific server for testing
   servers = []
@@ -193,132 +194,53 @@ def test_server(db_location, post_url, server, ping_attempts):
   results['url'] = ping_url
   results['distance'] = float(server['distance'])
   results['ping'] = ping_results
-  results['ins_date'] = current_date 
+  results['ins_date'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-  if verbose is True:
+
+  if args.verbose is True:
     print("Distance from server: %0.3f KM" % (results['distance']))
-    print("Avg ping over %d attempts: %0.3f ms" % (ping_attempts, results['ping']['avg']))
+    print("Avg ping over %d attempts: %0.3f ms" % (args.ping, results['ping']['avg']))
 
   # Test download speed
   results['download'] = float(s.download())
-  if verbose is True:
+  if args.verbose is True:
     print("Download speed: %0.3f Mb" % (results['download'] / 1000000))
 
   # Test upload speed
   results['upload'] = float(s.upload())
-  if verbose is True:
+  if args.verbose is True:
     print("Upload speed: %0.3f Mb" % (results['upload'] / 1000000))
 
 
   # Log results to database if provided
-  if db_location is not None:
-    log_result(db_location, results)
+  if args.database is not None:
+    for db_location in args.database:
+      log_result(db_location, results)
 
   # Post results to server if provided
-  if post_url is not None:
-    post_results(post_url, results)
+  if args.url is not None:
+    for post_url in args.url:
+      post_results(post_url, results, args.verbose)
 
   return results
 
 if __name__ == "__main__":
 
-  global verbose
-  global current_date
-
-  # Default variables
-  verbose = False
-  db_location = None
-  ping_attempts = 3
-  servers2test = 2
-  test_delay = 30
-  post_url = None
-
-  # Check for system arguments
-  if len(sys.argv) > 1:
-
-    # Loop through all arguments seatching for values to set
-    for i in range(1, len(sys.argv)):
-
-      # Skips non command inputs
-      if sys.argv[i][0] is not '-':
-        continue
-
-      # Set global verbose setting
-      if sys.argv[i] == "-v":
-        verbose = True
-
-      # Set database location
-      if sys.argv[i] == "-d":
-        if i + 1 < len(sys.argv):
-          db_location = sys.argv[i + 1]
-
-      # Set post url 
-      if sys.argv[i] == "-u":
-        if i + 1 < len(sys.argv):
-          post_url = sys.argv[i + 1]
-
-      # Set post url to wezley3s common server
-      if sys.argv[i] == "-U":
-        post_url = "https://statz.live/sst/php/post_results.php"
-
-      # Set ping attemts
-      if sys.argv[i] == "-p":
-        if i + 1 < len(sys.argv):
-          ping_attempts = int(sys.argv[i + 1])
-
-      # Set servers2test
-      if sys.argv[i] == "-t":
-        if i + 1 < len(sys.argv):
-          servers2test = int(sys.argv[i + 1])
-
-      # Set test_delay 
-      if sys.argv[i] == "-s":
-        if i + 1 < len(sys.argv):
-          test_delay = int(sys.argv[i + 1])
-  
-      # Print help otions then exit
-      if sys.argv[i] == "-h" or sys.argv[i] == "--help":
-        print("'-v' to enable verbose option")
-        print("'-d database_location.db' to set database")
-        print("'-u https://test.com/sst/php/post_results.php' to set custom upload url")
-        print("'-U' to default to statz.live")
-        print("'-p 4' to set ping attemts to 4: default 3")
-        print("'-t 4' to set servers to test to 4: default 2")
-        print("'-s 60' to set sleep between runs to 60sec: default 30sec")
-        exit()
-
-
-  # Check for database, if none provided default to verbose settings
-  if db_location is None:
-    if verbose is False:
-      print()
-      print("No database location provided")
-      print("Use -h or --help for help")
-      print("Defaulting to verbose")
-      verbose = True
-  else:
-    # Build the tables for database if needed
-    build_tables(db_location)
-
-
-  # Print information when inside verbose
-  if verbose is True:
-    print()
-    print("Testing information")
-    print("Verbose:", verbose)
-    print("Database:", db_location)
-    print("Post url:", post_url)
-    print("Ping attempts:", ping_attempts)
-    print("Servers to test:", servers2test)
-    print("Delay between tests", test_delay)
-    print()
-
+  # Parse in all command line arguments
+  parser = argparse.ArgumentParser(description='Test args desc')
+  parser.add_argument("-v", "--verbose", help='Enable verbose option', action="store_true")
+  parser.add_argument("-d", "--database", nargs='*',  help='databases to upload data to', type=str, default=None)
+  parser.add_argument("-u", "--url", nargs='*',  help="urls to upload data to", type=str, default=None)
+  parser.add_argument("-p", "--ping", nargs='?',  help="number of ping attempts", type=int, default=3)
+  parser.add_argument("-s", "--sleep", nargs='?', help="number of seconds between tests", type=int, default=30)
+  parser.add_argument("-t", "--tests", nargs='?', help="number of tests to be ran", type=int, default=1)
+  args = parser.parse_args()
 
   # Store common datetime for all tests
-  current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-  if verbose is True:
-    print("Starting tests at", current_date)
+  if args.verbose is True:
+    print("\nSet values")
+    for arg in vars(args):
+      print(arg, getattr(args, arg))
 
   # Link to speed test class
   s = speedtest.Speedtest()
@@ -330,13 +252,13 @@ if __name__ == "__main__":
   speed_test_results = []
 
 
-  if verbose is True:
-    print("Testing top %d servers" % (servers2test))
+  if args.verbose is True and args.tests > 1:
+    print("Testing top %d servers" % (args.tests))
 
   # Test given number of servers and sleep given time between test
-  for i in range(0, servers2test):
+  for i in range(0, args.tests):
     if i is not 0:
-      if verbose is True:
-        print("\nResting for %d sec" % (test_delay))
-      time.sleep(test_delay)
-    test_server(db_location, post_url, server_list[i], ping_attempts)
+      if args.verbose is True:
+        print("\nResting for %d sec" % (args.sleep))
+      time.sleep(args.sleep)
+    test_server(args, server_list[i])
