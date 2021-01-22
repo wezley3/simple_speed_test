@@ -170,7 +170,7 @@ def get_server_list(s=speedtest.Speedtest()):
   return server_list
 
 # Test the speeds of a given server and log the results into the provided database
-def test_server(args, server):
+def test_server(args, s, server):
 
   # Get server for ping and strip port number off
   ping_url = server['host'] 
@@ -220,15 +220,16 @@ def test_server(args, server):
   # Post results to server if provided
   if args.url is not None:
     for post_url in args.url:
-      post_results(post_url, results, args.verbose)
+      post_results(post_url, results, args.very_verbose)
 
   return results
 
 if __name__ == "__main__":
 
   # Parse in all command line arguments
-  parser = argparse.ArgumentParser(description='Test args desc')
-  parser.add_argument("-v", "--verbose", help='Enable verbose option', action="store_true")
+  parser = argparse.ArgumentParser(description='Simple Speed Test is designed to run a quick test on the nearest speed test servers. The results can then be loged to a database or uploaded to a server with POST. Other options may be set to help in diagnosing problems such as longer pings or multiple tests.')
+  parser.add_argument("-v", "--verbose", help='Speed test verbose option', action="store_true", default=False)
+  parser.add_argument("-V", "--very_verbose", help='All verbose option', action="store_true", default=False)
   parser.add_argument("-d", "--database", nargs='*',  help='databases to upload data to', type=str, default=None)
   parser.add_argument("-u", "--url", nargs='*',  help="urls to upload data to", type=str, default=None)
   parser.add_argument("-p", "--ping", nargs='?',  help="number of ping attempts", type=int, default=3)
@@ -236,29 +237,30 @@ if __name__ == "__main__":
   parser.add_argument("-t", "--tests", nargs='?', help="number of tests to be ran", type=int, default=1)
   args = parser.parse_args()
 
-  # Store common datetime for all tests
-  if args.verbose is True:
+  # Print out all set variables is very verbose
+  if args.very_verbose is True:
     print("\nSet values")
     for arg in vars(args):
       print(arg, getattr(args, arg))
 
+
+  # Begin testing server sepeeds
+
   # Link to speed test class
   s = speedtest.Speedtest()
-
-  # Get the list of servers to test
   server_list = get_server_list(s)
 
-  # Create master list for results
-  speed_test_results = []
-
-
-  if args.verbose is True and args.tests > 1:
+  if args.very_verbose is True and args.tests > 1:
     print("Testing top %d servers" % (args.tests))
 
   # Test given number of servers and sleep given time between test
   for i in range(0, args.tests):
+  
+    # Sleep if needed
     if i is not 0:
-      if args.verbose is True:
+      if args.very_verbose is True:
         print("\nResting for %d sec" % (args.sleep))
       time.sleep(args.sleep)
-    test_server(args, server_list[i])
+
+    # Run the speed test
+    test_server(args, s, server_list[i])
