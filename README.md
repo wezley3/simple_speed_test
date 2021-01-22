@@ -8,9 +8,7 @@ pip3 install sqlite3 requests speedtest-cli
 
 # Command line arguments
 
-usage: main.py [-h] [-v] [-V] [-d [DATABASE [DATABASE ...]]]
-
-               [-u [URL [URL ...]]] [-p [PING]] [-s [SLEEP]] [-t [TESTS]]
+usage: main.py [-h] [-v] [-V] [-d [DATABASE [DATABASE ...]]] [-u [URL [URL ...]]] [-p [PING]] [-s [SLEEP]] [-t [TESTS]]
 
 Simple Speed Test is designed to run a quick test on the nearest speed test
 
