@@ -3,7 +3,7 @@
 # Wezley 3
 
 # Install python packages
-apt-get install -y python3 sqlite3
+apt-get install -y python3 python3-pip sqlite3
 python3 -m pip install -U pip
 python3 -m pip install requests speedtest-cli
 
